@@ -27,30 +27,50 @@ app.use(limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 
-// Health check is defined after static path setup below
-
 // Serve client build (static files)
 const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
-app.use(express.static(clientBuildPath));
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Social posting API is running', clientBuildPath });
-});
+const fs = require('fs');
 
-// Basic log on startup
-try {
-  const fs = require('fs');
-  if (!fs.existsSync(clientBuildPath)) {
-    console.warn(`Client build folder not found at ${clientBuildPath}. SPA will 404 until built.`);
-  }
-} catch (e) {
-  // ignore
+// Check if client build exists
+if (fs.existsSync(clientBuildPath)) {
+  console.log(`✅ Client build found at: ${clientBuildPath}`);
+  app.use(express.static(clientBuildPath));
+} else {
+  console.log(`❌ Client build NOT found at: ${clientBuildPath}`);
+  // Serve a simple fallback page
+  app.get('/', (req, res) => {
+    res.send(`
+      <html>
+        <head><title>Social Posting App</title></head>
+        <body>
+          <h1>Social Posting App</h1>
+          <p>Client build not found. Check Render build logs.</p>
+          <p>API is working: <a href="/api/health">/api/health</a></p>
+        </body>
+      </html>
+    `);
+  });
 }
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Social posting API is running', 
+    clientBuildPath,
+    clientBuildExists: fs.existsSync(clientBuildPath)
+  });
+});
 
 // SPA fallback for client-side routing (must be after API routes)
 app.get('*', (req, res, next) => {
   // Only handle non-API routes here
   if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
+  
+  if (fs.existsSync(clientBuildPath)) {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  } else {
+    res.status(404).send('Client build not found');
+  }
 });
 
 // Error handling middleware
