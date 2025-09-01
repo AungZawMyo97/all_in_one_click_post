@@ -4,9 +4,16 @@ services:
     env: node
     plan: free
     buildCommand: |
+      echo "Starting build process..."
+      echo "Current directory: $(pwd)"
+      echo "Installing root dependencies..."
       npm ci
+      echo "Building client..."
       cd client && npm ci && CI=false npm run build
+      echo "Client build completed"
+      echo "Installing server dependencies..."
       cd ../server && npm ci
+      echo "Build process completed"
     startCommand: node server/index.js
     autoDeploy: true
     envVars:
