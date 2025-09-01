@@ -1,69 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import './App.css';
+
+// Get API URL from environment variable or default to localhost
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is already authenticated
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(userData));
+    if (token) {
+      // Verify token with backend
+      fetch(`${API_BASE_URL}/api/auth/verify`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          setIsAuthenticated(true);
+          // You might want to fetch user data here
+        } else {
+          localStorage.removeItem('token');
+        }
+      })
+      .catch(error => {
+        console.error('Token verification failed:', error);
+        localStorage.removeItem('token');
+      });
     }
   }, []);
 
-  const handleLogin = (token, userData) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const handleLogin = (userData) => {
     setIsAuthenticated(true);
     setUser(userData);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
+    localStorage.removeItem('token');
   };
 
   return (
-    <Router>
-      <div className="App min-h-screen bg-gray-50">
-        <Routes>
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Login onLogin={handleLogin} />
-            } 
-          />
-          <Route 
-            path="/dashboard" 
-            element={
-              isAuthenticated ? 
-                <Dashboard user={user} onLogout={handleLogout} /> : 
-                <Navigate to="/login" replace />
-            } 
-          />
-          <Route 
-            path="/" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Navigate to="/login" replace />
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <div className="App">
+      {!isAuthenticated ? (
+        <Login onLogin={handleLogin} apiBaseUrl={API_BASE_URL} />
+      ) : (
+        <Dashboard onLogout={handleLogout} user={user} apiBaseUrl={API_BASE_URL} />
+      )}
+    </div>
   );
 }
 

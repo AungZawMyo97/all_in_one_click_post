@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 
-const Login = ({ onLogin }) => {
+const Login = ({ onLogin, apiBaseUrl }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -25,8 +25,9 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/login', formData);
-      onLogin(response.data.token, response.data.user);
+      const response = await axios.post(`${apiBaseUrl}/api/auth/login`, formData);
+      localStorage.setItem('token', response.data.token);
+      onLogin(response.data.user);
     } catch (error) {
       setError(error.response?.data?.error || 'Login failed. Please try again.');
     } finally {

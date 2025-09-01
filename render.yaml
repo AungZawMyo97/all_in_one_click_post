@@ -1,16 +1,18 @@
 services:
+  # Backend API Service
   - type: web
-    name: social-posting
+    name: social-posting-api
     env: node
     plan: free
-    buildCommand: npm run build:all
-    startCommand: npm start
-    autoDeploy: true
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
     envVars:
-      - key: NODE_VERSION
-        value: 18
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_CHANNEL_ID
@@ -19,3 +21,14 @@ services:
         sync: false
       - key: VIBER_COMMUNITY_ID
         sync: false
+
+  # Frontend Static Site
+  - type: web
+    name: social-posting-frontend
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://social-posting-api.onrender.com

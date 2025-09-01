@@ -5,7 +5,7 @@ import PostingForm from './PostingForm';
 import PlatformSelector from './PlatformSelector';
 import PostingResults from './PostingResults';
 
-const Dashboard = ({ user, onLogout }) => {
+const Dashboard = ({ user, onLogout, apiBaseUrl }) => {
   const [platforms, setPlatforms] = useState([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [postingResults, setPostingResults] = useState(null);
@@ -17,7 +17,7 @@ const Dashboard = ({ user, onLogout }) => {
 
   const fetchPlatforms = async () => {
     try {
-      const response = await axios.get('/api/posts/platforms');
+      const response = await axios.get(`${apiBaseUrl}/api/posts/platforms`);
       setPlatforms(response.data.platforms);
     } catch (error) {
       // Failed to fetch platforms
@@ -35,7 +35,7 @@ const Dashboard = ({ user, onLogout }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/posts/publish', {
+      const response = await axios.post(`${apiBaseUrl}/api/posts/publish`, {
         content,
         platforms: selectedPlatforms,
         imageUrl
