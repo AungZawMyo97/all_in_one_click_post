@@ -27,10 +27,7 @@ app.use(limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Social posting API is running' });
-});
+// Health check is defined after static path setup below
 
 // Serve client build (static files)
 const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
