@@ -5,7 +5,7 @@ services:
     plan: free
     buildCommand: |
       npm ci
-      cd client && npm ci && npm run build
+      cd client && npm ci && CI=false npm run build
       cd ../server && npm ci
     startCommand: node server/index.js
     autoDeploy: true
