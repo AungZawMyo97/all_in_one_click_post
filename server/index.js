@@ -33,13 +33,27 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve client build (static files)
-app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
+const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
+app.use(express.static(clientBuildPath));
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Social posting API is running', clientBuildPath });
+});
+
+// Basic log on startup
+try {
+  const fs = require('fs');
+  if (!fs.existsSync(clientBuildPath)) {
+    console.warn(`Client build folder not found at ${clientBuildPath}. SPA will 404 until built.`);
+  }
+} catch (e) {
+  // ignore
+}
 
 // SPA fallback for client-side routing (must be after API routes)
 app.get('*', (req, res, next) => {
   // Only handle non-API routes here
   if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // Error handling middleware
