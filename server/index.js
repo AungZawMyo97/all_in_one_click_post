@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
@@ -29,6 +30,16 @@ app.use('/api/posts', postRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Social posting API is running' });
+});
+
+// Serve client build (static files)
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
+
+// SPA fallback for client-side routing (must be after API routes)
+app.get('*', (req, res, next) => {
+  // Only handle non-API routes here
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
 });
 
 // Error handling middleware

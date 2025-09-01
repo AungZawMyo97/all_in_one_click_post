@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: social-posting
+    env: node
+    plan: free
+    buildCommand: |
+      cd client && npm ci && npm run build && cd ../server && npm ci
+    startCommand: node index.js
+    rootDir: server
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: JWT_SECRET
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHANNEL_ID
+        sync: false
+      - key: VIBER_BOT_TOKEN
+        sync: false
+      - key: VIBER_COMMUNITY_ID
+        sync: false
