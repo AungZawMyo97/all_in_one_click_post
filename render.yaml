@@ -3,18 +3,8 @@ services:
     name: social-posting
     env: node
     plan: free
-    buildCommand: |
-      echo "Starting build process..."
-      echo "Current directory: $(pwd)"
-      echo "Installing root dependencies..."
-      npm ci
-      echo "Building client..."
-      cd client && npm ci && CI=false npm run build
-      echo "Client build completed"
-      echo "Installing server dependencies..."
-      cd ../server && npm ci
-      echo "Build process completed"
-    startCommand: node server/index.js
+    buildCommand: npm run build:all
+    startCommand: npm start
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
