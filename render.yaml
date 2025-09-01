@@ -3,7 +3,7 @@ services:
   - type: web
     name: social-posting-api
     env: node
-    plan: hobby
+    plan: starter
     buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
